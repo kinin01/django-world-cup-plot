@@ -14,14 +14,22 @@ class Command(BaseCommand):
         urls = self.construct_urls()
         for url in urls:
             response = requests.get(url)
+
             soup = BeautifulSoup(response.content, 'html.parser')
-            
+           
             results = soup.find_all('div', class_='sp-c-fixture_wrapper')
             
             for result in results:
-                home = result.select_one('.sp-c-fixture_team-name--home .qa-full-team-name')
-                away = result.select_one('.sp-c-fixture_team-name--away .qa-full-team-name')
-                print(home, away)
+                home = result.select_one('.sp-c-fixture_team-name--home .qa-full-team-name').txt
+                away = result.select_one('.sp-c-fixture_team-name--away .qa-full-team-name').txt
+                home_goals = result.select_one('.sp-c-fixture_number--home').txt
+                away_goals = result.select_one('.sp-c-fixture_number--away').txt
+                Fixture.objects.get_or_create(
+                    team1=home,
+                    team2=away,
+                    team1_goals=home_goals,
+                    team2_goals=away_goals
+                )
         
     def construct_urls(self): 
         BASE_URL = "https://www.bbc.co.uk/sport/football/world-cup/scores-fixtures/"
